@@ -25,7 +25,7 @@ def main(params, action):
     path = "demo.mp4"
     debug_count = 0
 
-    stride = 250
+    stride = 200
     video_capture = cv2.VideoCapture(path)
     height = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
     width = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))

@@ -1,6 +1,8 @@
 #@ type: compute
 #@ parents:
 #@   - decode
+#@ dependents:
+#@   - filter
 #@ corunning:
 #@   mem1:
 #@     trans: mem1
@@ -19,6 +21,8 @@ def main(params, action):
     # TODO: Read and select results from memory elements
 
     # TODO: Output results to another memory elements
+    select_context_dict = {}
+    select_context_dict["select_index"] = []
 
     # read metadata to setup
     trans = action.get_transport('mem1', 'rdma')
@@ -28,12 +32,14 @@ def main(params, action):
     context_dict = pickle.loads(context_dict_in_byte)
     buffer_pool = buffer_pool_lib.buffer_pool({'mem1': trans}, context_dict["buffer_pool_metadata"])
 
-    # image = remote_array(buffer_pool, metadata=context_dict["remote_input"]).materialize()
-    counter = 0
+    select_context_dict["buffer_pool_metadata"] = context_dict["buffer_pool_metadata"]
+    select_context_dict["remote_input"] = context_dict["remote_input"]
+
     for metadata in context_dict["remote_input"]:
-        print(metadata)
         images = remote_array(buffer_pool, metadata=metadata).materialize()
         for i in range(images.shape[0]):
-            cv2.imwrite("output/output"+str(counter)+".jpg", images[i])
-            counter = counter+1
-    return {}
+            if i%10 == 0:
+                select_context_dict["select_index"].append(i)
+
+    select_context_dict_in_byte = pickle.dumps(select_context_dict)
+    return {'meta': base64.b64encode(select_context_dict_in_byte).decode("ascii")}
