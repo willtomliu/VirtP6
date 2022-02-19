@@ -1,0 +1,6 @@
+type: memory
+corunning:
+    - decode
+    - select
+limits:
+    mem: 16 MB
