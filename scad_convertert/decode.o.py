@@ -20,21 +20,50 @@ def main(params, action):
     trans = action.get_transport('mem1', 'rdma')
     trans.reg(buffer_pool_lib.buffer_size)
     buffer_pool = buffer_pool_lib.buffer_pool({'mem1': trans})
-    path = "demo.mp4"
-    stride = 10
-
-
-    video_capture = cv2.VideoCapture(path)
-    still_reading, image = video_capture.read()
-
-    # loading data
-    remote_input = remote_array(buffer_pool, input_ndarray=image, transport_name='mem1')
-
-
-    # update context
-    remote_input_metadata = remote_input.get_array_metadata()
     context_dict = {}
-    context_dict["remote_input"] = remote_input_metadata
+    context_dict["remote_input"] = []
+    path = "demo.mp4"
+    debug_count = 0
+
+    stride = 250
+    video_capture = cv2.VideoCapture(path)
+    height = int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    width = int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+    still_reading = True
+    save_frame_list = []
+    # save_frame = np.empty((stride, height, width, 3), dtype=np.uint8)
+    while still_reading:
+        save_frame_list.append(np.empty((stride, height, width, 3), dtype=np.uint8))
+        save_frame = save_frame_list[-1]
+        for i in range(0, stride):
+            still_reading, image = video_capture.read()
+            if still_reading:
+                save_frame[i] = image
+            else:
+                if i == 0:
+                    break
+                else:
+                    # uploading data
+                    print("bjnb")
+                    remote_input = remote_array(buffer_pool, input_ndarray=save_frame[:i], transport_name='mem1')
+                    # update context
+                    remote_input_metadata = remote_input.get_array_metadata()
+                    context_dict["remote_input"].append(remote_input_metadata)
+                    break
+        if still_reading:
+            # uploading data
+            print(debug_count)
+            debug_count+=1
+            remote_input = remote_array(buffer_pool, input_ndarray=save_frame, transport_name='mem1')
+            # print(save_frame)
+            # update context
+            remote_input_metadata = remote_input.get_array_metadata()
+            context_dict["remote_input"].append(remote_input_metadata)
+            if debug_count == 1:
+                break
+
+
+
     context_dict["buffer_pool_metadata"] = buffer_pool.get_buffer_metadata()
 
     context_dict_in_byte = pickle.dumps(context_dict)

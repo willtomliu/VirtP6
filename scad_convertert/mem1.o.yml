@@ -3,4 +3,4 @@ corunning:
     - decode
     - select
 limits:
-    mem: 16 MB
+    mem: 1024 MB

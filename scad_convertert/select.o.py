@@ -28,6 +28,12 @@ def main(params, action):
     context_dict = pickle.loads(context_dict_in_byte)
     buffer_pool = buffer_pool_lib.buffer_pool({'mem1': trans}, context_dict["buffer_pool_metadata"])
 
-    image = remote_array(buffer_pool, metadata=context_dict["remote_input"]).materialize()
-    cv2.imwrite("output.jpg", image)
+    # image = remote_array(buffer_pool, metadata=context_dict["remote_input"]).materialize()
+    counter = 0
+    for metadata in context_dict["remote_input"]:
+        print(metadata)
+        images = remote_array(buffer_pool, metadata=metadata).materialize()
+        for i in range(images.shape[0]):
+            cv2.imwrite("output/output"+str(counter)+".jpg", images[i])
+            counter = counter+1
     return {}
