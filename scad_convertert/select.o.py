@@ -26,7 +26,6 @@ def main(params, action):
     context_dict_in_b64 = params["decode"][0]['meta']
     context_dict_in_byte = base64.b64decode(context_dict_in_b64)
     context_dict = pickle.loads(context_dict_in_byte)
-    print(context_dict)
     buffer_pool = buffer_pool_lib.buffer_pool({'mem1': trans}, context_dict["buffer_pool_metadata"])
 
     image = remote_array(buffer_pool, metadata=context_dict["remote_input"]).materialize()

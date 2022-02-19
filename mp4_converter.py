@@ -7,7 +7,7 @@ def convert_mp4_to_jpgs(path):
     frame_count = 0
     n = 0
     while still_reading:
-        n = n+1
+        n += 1
         print(n)
         print(cv2.imwrite(f"output/frame_{frame_count:03d}.jpg", image))
 

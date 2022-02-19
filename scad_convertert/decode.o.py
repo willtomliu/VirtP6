@@ -16,14 +16,16 @@ from disaggrt.rdma_array import remote_array
 import urllib.request
 
 def main(params, action):
-    path = "demo.mp4"
-    video_capture = cv2.VideoCapture(path)
-    still_reading, image = video_capture.read()
-
     # setup
     trans = action.get_transport('mem1', 'rdma')
     trans.reg(buffer_pool_lib.buffer_size)
-    buffer_pool = buffer_pool_lib.buffer_pool({'mem1':trans})
+    buffer_pool = buffer_pool_lib.buffer_pool({'mem1': trans})
+    path = "demo.mp4"
+    stride = 10
+
+
+    video_capture = cv2.VideoCapture(path)
+    still_reading, image = video_capture.read()
 
     # loading data
     remote_input = remote_array(buffer_pool, input_ndarray=image, transport_name='mem1')
