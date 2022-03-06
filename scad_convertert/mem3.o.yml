@@ -1,6 +1,6 @@
 type: memory
 corunning:
-    - select
     - filter
+    - output
 limits:
     mem: 512 MB
