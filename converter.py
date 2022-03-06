@@ -119,6 +119,15 @@ def main():
     outputType = "gif"
     outputPath = os.path.join(outputFolder, f"{outputName}.{outputType}")
 
+    for outDir in [mem1, mem2, mem3, outputFolder]:
+        if os.path.exists(outDir):
+            shutil.rmtree(outDir)
+        try:
+            os.mkdir(outDir)
+        except IOError:
+            print("Error occurred creating output folder")
+            return
+
     decode(resourcePath, mem1)
     select(mem1, mem2, "jpg")
     filter(mem2, mem3, "jpg", "jpg", 800)
