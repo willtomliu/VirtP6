@@ -5,7 +5,7 @@ import shutil
 
 from PIL import Image
 
-
+@profile
 def decode(resourcePath, outFolder):
     video_capture = cv2.VideoCapture(resourcePath)
     still_reading, image = video_capture.read()
@@ -17,20 +17,7 @@ def decode(resourcePath, outFolder):
         still_reading, image = video_capture.read()
         frame_count += 1
 
-
-# def select(inFolder, outFolder, inType, outType):
-#     images = glob.glob(f"{inFolder}/*.{inType}")
-#     images.sort()
-#     if not images:
-#         raise RuntimeError("jpg files required!")
-#     skip = 10
-#     selectedIndex = []
-#     for index, image in enumerate(images):
-#         if index % skip == 0:
-#             selectedIndex.append(index)
-#     return selectedIndex
-
-
+@profile
 def select(inFolder, outFolder, inType, outType=None):
     images = glob.glob(f"{inFolder}/*.{inType}")
     images.sort()
@@ -42,32 +29,7 @@ def select(inFolder, outFolder, inType, outType=None):
             _, fileName = os.path.split(image)
             shutil.copy(image, os.path.join(outFolder, fileName))
 
-
-# def filter(inFolder, outFolder, inType, outType, selectedIndex, width=None,
-#            height=None):
-#     images = glob.glob(f"{inFolder}/*.{inType}")
-#     images.sort()
-#     if not images:
-#         raise RuntimeError("jpg files required!")
-#     first_image = Image.open(images[0])
-#     w, h = first_image.size
-#     if width and height:
-#         max_size = (width, height)
-#     elif width:
-#         max_size = (width, h)
-#     elif height:
-#         max_size = (w, height)
-#     else:
-#         raise RuntimeError('Width or height required!')
-#     for count, index in enumerate(selectedIndex):
-#         img = Image.open(images[index])
-#         img.resize(max_size, Image.ANTIALIAS)
-#         outImagePath = os.path.join(outFolder,
-#                                     f"frame{count:04d}_resized.{outType}")
-#         img.save(outImagePath)
-#         img.close()
-
-
+@profile
 def filter(inFolder, outFolder, inType, outType, width=None, height=None):
     images = glob.glob(f"{inFolder}/*.{inType}")
     images.sort()
@@ -86,12 +48,11 @@ def filter(inFolder, outFolder, inType, outType, width=None, height=None):
     for count, image in enumerate(images):
         img = Image.open(image)
         img.resize(max_size, Image.ANTIALIAS)
-        outImagePath = os.path.join(outFolder,
-                                    f"frame{count:04d}_resized.{outType}")
+        outImagePath = os.path.join(outFolder, f"frame{count:04d}_resized.{outType}")
         img.save(outImagePath)
         img.close()
 
-
+@profile
 def output(inFolder, outputPath, inType, outType):
     images = glob.glob(f"{inFolder}/*{inType}")
     images.sort()
@@ -102,13 +63,12 @@ def output(inFolder, outputPath, inType, outType):
     frame_one.save(outputPath, format=outType, append_images=frames,
                    save_all=True, duration=50, loop=0)
 
-
+@profile
 def main():
     resourceFolder = "resource"
     resourceName = "flask_demo"
     resourceType = "mp4"
-    resourcePath = os.path.join(resourceFolder,
-                                f"{resourceName}.{resourceType}")
+    resourcePath = os.path.join(resourceFolder, f"{resourceName}.{resourceType}")
 
     mem1 = "mem1"
     mem2 = "mem2"
@@ -136,3 +96,39 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# def select(inFolder, outFolder, inType, outType):
+#     images = glob.glob(f"{inFolder}/*.{inType}")
+#     images.sort()
+#     if not images:
+#         raise RuntimeError("jpg files required!")
+#     skip = 10
+#     selectedIndex = []
+#     for index, image in enumerate(images):
+#         if index % skip == 0:
+#             selectedIndex.append(index)
+#     return selectedIndex
+
+# def filter(inFolder, outFolder, inType, outType, selectedIndex, width=None,
+#            height=None):
+#     images = glob.glob(f"{inFolder}/*.{inType}")
+#     images.sort()
+#     if not images:
+#         raise RuntimeError("jpg files required!")
+#     first_image = Image.open(images[0])
+#     w, h = first_image.size
+#     if width and height:
+#         max_size = (width, height)
+#     elif width:
+#         max_size = (width, h)
+#     elif height:
+#         max_size = (w, height)
+#     else:
+#         raise RuntimeError('Width or height required!')
+#     for count, index in enumerate(selectedIndex):
+#         img = Image.open(images[index])
+#         img.resize(max_size, Image.ANTIALIAS)
+#         outImagePath = os.path.join(outFolder,
+#                                     f"frame{count:04d}_resized.{outType}")
+#         img.save(outImagePath)
+#         img.close()
