@@ -60,8 +60,7 @@ def output(inFolder, outputPath, inType, outType):
         raise RuntimeError(f"{inType} files required!")
     frames = [Image.open(image) for image in images]
     frame_one = frames[0]
-    frame_one.save(outputPath, format=outType, append_images=frames,
-                   save_all=True, duration=50, loop=0)
+    frame_one.save(outputPath, format=outType, append_images=frames, save_all=True, duration=50, loop=0)
 
 @profile
 def main():
