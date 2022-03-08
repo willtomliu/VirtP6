@@ -9,35 +9,20 @@ def one_hot_encoding(labels, dimension=10):
 
 
 def loadData():
-    data_sources = {
-        "training_images": "train-images-idx3-ubyte.gz",
-        "test_images": "t10k-images-idx3-ubyte.gz",
-        "training_labels": "train-labels-idx1-ubyte.gz",
-        "test_labels": "t10k-labels-idx1-ubyte.gz",
-    }
+    data_sources = {"training_images": "train-images-idx3-ubyte.gz", "test_images": "t10k-images-idx3-ubyte.gz", "training_labels": "train-labels-idx1-ubyte.gz", "test_labels": "t10k-labels-idx1-ubyte.gz"}
 
     data_dir = "mnist"
     mnist_dataset = {}
 
     for key in ("training_images", "test_images"):
-        with gzip.open(os.path.join(data_dir, data_sources[key]),
-                       "rb") as mnist_file:
-            mnist_dataset[key] = np.frombuffer(
-                mnist_file.read(), np.uint8, offset=16
-            ).reshape(-1, 28 * 28)
+        with gzip.open(os.path.join(data_dir, data_sources[key]), "rb") as mnist_file:
+            mnist_dataset[key] = np.frombuffer(mnist_file.read(), np.uint8, offset=16).reshape(-1, 28 * 28)
 
     for key in ("training_labels", "test_labels"):
-        with gzip.open(os.path.join(data_dir, data_sources[key]),
-                       "rb") as mnist_file:
-            mnist_dataset[key] = np.frombuffer(mnist_file.read(), np.uint8,
-                                               offset=8)
+        with gzip.open(os.path.join(data_dir, data_sources[key]),"rb") as mnist_file:
+            mnist_dataset[key] = np.frombuffer(mnist_file.read(), np.uint8, offset=8)
 
-    x_train, y_train, x_test, y_test = (
-        mnist_dataset["training_images"],
-        mnist_dataset["training_labels"],
-        mnist_dataset["test_images"],
-        mnist_dataset["test_labels"],
-    )
+    x_train, y_train, x_test, y_test = (mnist_dataset["training_images"], mnist_dataset["training_labels"], mnist_dataset["test_images"], mnist_dataset["test_labels"])
 
     training_sample, test_sample = 1000, 1000
     training_images = x_train[0:training_sample] / 255
@@ -75,11 +60,7 @@ def train(training_images, training_labels, test_images, test_labels):
     store_test_accurate_pred = []
 
     for j in range(epochs):
-        trainOneEpch(training_images, training_labels, test_images, test_labels,
-                     weights_1, weights_2, learning_rate, rng,
-                     store_training_loss,
-                     store_training_accurate_pred, store_test_loss,
-                     store_test_accurate_pred)
+        trainOneEpch(training_images, training_labels, test_images, test_labels, weights_1, weights_2, learning_rate, rng, store_training_loss, store_training_accurate_pred, store_test_loss, store_test_accurate_pred)
 
 
 def forward(input, weights_1, weights_2, rng):
@@ -92,13 +73,9 @@ def forward(input, weights_1, weights_2, rng):
     return layer_0, layer_1, layer_2, dropout_mask
 
 
-def backporp(training_loss, training_accurate_predictions, labels, layer_0,
-             layer_1, layer_2, weights_1, weights_2, dropout_mask,
-             learning_rate):
+def backporp(training_loss, training_accurate_predictions, labels, layer_0, layer_1, layer_2, weights_1, weights_2, dropout_mask, learning_rate):
     training_loss += np.sum((labels - layer_2) ** 2)
-    training_accurate_predictions += int(
-        np.argmax(layer_2) == np.argmax(labels)
-    )
+    training_accurate_predictions += int(np.argmax(layer_2) == np.argmax(labels))
     layer_2_delta = labels - layer_2
     layer_1_delta = np.dot(weights_2, layer_2_delta) * relu2deriv(layer_1)
     layer_1_delta *= dropout_mask
@@ -107,20 +84,12 @@ def backporp(training_loss, training_accurate_predictions, labels, layer_0,
     return training_loss, training_accurate_predictions
 
 
-def trainOneEpch(training_images, training_labels, test_images, test_labels,
-                 weights_1, weights_2, learning_rate, rng, store_training_loss,
-                 store_training_accurate_pred, store_test_loss,
-                 store_test_accurate_pred):
+def trainOneEpch(training_images, training_labels, test_images, test_labels, weights_1, weights_2, learning_rate, rng, store_training_loss, store_training_accurate_pred, store_test_loss, store_test_accurate_pred):
     training_loss = 0.0
     training_accurate_predictions = 0
     for i in range(len(training_images)):
-        layer_0, layer_1, layer_2, dropout_mask = forward(training_images[i],
-                                                          weights_1, weights_2,
-                                                          rng)
-        training_loss, training_accurate_predictions = backporp(
-            training_loss, training_accurate_predictions, training_labels[i],
-            layer_0, layer_1, layer_2, weights_1, weights_2, dropout_mask,
-            learning_rate)
+        layer_0, layer_1, layer_2, dropout_mask = forward(training_images[i], weights_1, weights_2, rng)
+        training_loss, training_accurate_predictions = backporp(training_loss, training_accurate_predictions, training_labels[i], layer_0, layer_1, layer_2, weights_1, weights_2, dropout_mask, learning_rate)
 
     store_training_loss.append(training_loss)
     store_training_accurate_pred.append(training_accurate_predictions)
@@ -128,23 +97,11 @@ def trainOneEpch(training_images, training_labels, test_images, test_labels,
     results = relu(test_images @ weights_1) @ weights_2
     test_loss = np.sum((test_labels - results) ** 2)
 
-    test_accurate_predictions = np.sum(
-        np.argmax(results, axis=1) == np.argmax(test_labels, axis=1)
-    )
+    test_accurate_predictions = np.sum(np.argmax(results, axis=1) == np.argmax(test_labels, axis=1))
 
     store_test_loss.append(test_loss)
     store_test_accurate_pred.append(test_accurate_predictions)
 
-    # print(
-    #     " Training set error:"
-    #     + str(training_loss / float(len(training_images)))[0:5]
-    #     + " Training set accuracy:"
-    #     + str(training_accurate_predictions / float(len(training_images)))
-    #     + " Test set error:"
-    #     + str(test_loss / float(len(test_images)))[0:5]
-    #     + " Test set accuracy:"
-    #     + str(test_accurate_predictions / float(len(test_images)))
-    # )
 
 
 def main():
