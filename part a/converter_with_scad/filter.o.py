@@ -60,7 +60,7 @@ def scale_image(original_image, width=None, height=None):
     else:
         # No width or height specified
         raise RuntimeError('Width or height required!')
-    resized =  cv2.resize(original_image, max_size)
+    resized = cv2.resize(original_image, max_size)
     return resized
 
 
@@ -79,7 +79,7 @@ def main(params, action):
     trans3.reg(buffer_pool_lib.buffer_size)
 
     resized_width = context_dict["target_resolution"][0]
-    resized_height =  context_dict["target_resolution"][1]
+    resized_height = context_dict["target_resolution"][1]
     resized_stride = int(buffer_pool_lib.buffer_size/(resized_height*resized_width*3))
     resized_image_buffer = image_buffer(resized_stride, resized_height, resized_width, trans3, 'mem3')
 
@@ -87,7 +87,7 @@ def main(params, action):
         original_images = remote_array(buffer_pool_select, metadata=metadata).materialize()
         print(original_images.shape[0])
         for i in range(original_images.shape[0]):
-            resized_image = scale_image(original_images[i], resized_width,resized_height)
+            resized_image = scale_image(original_images[i], resized_width, resized_height)
             resized_image_buffer.put(resized_image)
 
     resized_image_buffer.flush()
