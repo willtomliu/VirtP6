@@ -16,7 +16,7 @@ def relu2deriv(output):
     return output >= 0
 
 
-@profile
+# @profile
 def main():
     data_sources = {"training_images": "train-images-idx3-ubyte.gz", "test_images": "t10k-images-idx3-ubyte.gz", "training_labels": "train-labels-idx1-ubyte.gz", "test_labels": "t10k-labels-idx1-ubyte.gz"}
 
@@ -43,13 +43,14 @@ def main():
     rng = np.random.default_rng(seed)
 
     learning_rate = 0.005
-    epochs = 10
-    hidden_size = 100
+    epochs = 20
+    hidden_size = 5000
     pixels_per_image = 784
     num_labels = 10
 
     weights_1 = 0.2 * rng.random((pixels_per_image, hidden_size)) - 0.1
-    weights_2 = 0.2 * rng.random((hidden_size, num_labels)) - 0.1
+    weights_2 = 0.2 * rng.random((hidden_size, hidden_size)) - 0.1
+    weights_3 = 0.2 * rng.random((hidden_size, num_labels)) - 0.1
 
     store_training_loss = []
     store_training_accurate_pred = []
@@ -68,29 +69,42 @@ def main():
 
             layer_1 = relu(layer_1)
 
-            dropout_mask = rng.integers(low=0, high=2, size=layer_1.shape)
+            dropout_mask_1 = rng.integers(low=0, high=2, size=layer_1.shape)
 
-            layer_1 *= dropout_mask * 2
+            layer_1 *= dropout_mask_1 * 2
 
             layer_2 = np.dot(layer_1, weights_2)
 
-            training_loss += np.sum((training_labels[i] - layer_2) ** 2)
+            layer_2 = relu(layer_2)
 
-            training_accurate_predictions += int(np.argmax(layer_2) == np.argmax(training_labels[i]))
+            dropout_mask_2 = rng.integers(low=0, high=2, size=layer_2.shape)
 
-            layer_2_delta = training_labels[i] - layer_2
+            layer_2 *= dropout_mask_2 * 2
+
+            layer_3 = np.dot(layer_2, weights_3)
+
+            training_loss += np.sum((training_labels[i] - layer_3) ** 2)
+
+            training_accurate_predictions += int(np.argmax(layer_3) == np.argmax(training_labels[i]))
+
+            layer_3_delta = training_labels[i] - layer_3
+
+            layer_2_delta = np.dot(weights_3, layer_3_delta) * relu2deriv(layer_2)
+
+            layer_2_delta *= dropout_mask_2
 
             layer_1_delta = np.dot(weights_2, layer_2_delta) * relu2deriv(layer_1)
 
-            layer_1_delta *= dropout_mask
+            layer_1_delta *= dropout_mask_1
 
             weights_1 += learning_rate * np.outer(layer_0, layer_1_delta)
             weights_2 += learning_rate * np.outer(layer_1, layer_2_delta)
+            weights_3 += learning_rate * np.outer(layer_2, layer_3_delta)
 
         store_training_loss.append(training_loss)
         store_training_accurate_pred.append(training_accurate_predictions)
 
-        results = relu(test_images @ weights_1) @ weights_2
+        results = relu(relu(test_images @ weights_1) @ weights_2) @ weights_3
 
         test_loss = np.sum((test_labels - results) ** 2)
 
@@ -98,6 +112,10 @@ def main():
 
         store_test_loss.append(test_loss)
         store_test_accurate_pred.append(test_accurate_predictions)
+
+    np.save("w1.npy", weights_1)
+    np.save("w2.npy", weights_2)
+    np.save("w3.npy", weights_3)
 
 
 if __name__ == '__main__':
