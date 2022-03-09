@@ -1,0 +1,119 @@
+Timer unit: 1e-06 s
+
+Total time: 1.18023 s
+File: converter.py
+Function: decode at line 8
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+     8                                           @profile
+     9                                           def decode(resourcePath, outFolder):
+    10         1       3777.0   3777.0      0.3      video_capture = cv2.VideoCapture(resourcePath)
+    11         1       2316.0   2316.0      0.2      still_reading, image = video_capture.read()
+    12         1          0.0      0.0      0.0      frame_count = 0
+    13                                           
+    14       463        117.0      0.3      0.0      while still_reading:
+    15       462    1134752.0   2456.2     96.1          cv2.imwrite(f"{outFolder}/frame_{frame_count:04d}.jpg", image)
+    16                                                   # read next image
+    17       462      38879.0     84.2      3.3          still_reading, image = video_capture.read()
+    18       462        392.0      0.8      0.0          frame_count += 1
+
+Total time: 0.279678 s
+File: converter.py
+Function: select at line 20
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    20                                           @profile
+    21                                           def select(inFolder, outFolder, inType, outType=None):
+    22         1       3429.0   3429.0      1.2      images = glob.glob(f"{inFolder}/*.{inType}")
+    23         1          7.0      7.0      0.0      images.sort()
+    24         1          1.0      1.0      0.0      if not images:
+    25                                                   raise RuntimeError("jpg files required!")
+    26         1          0.0      0.0      0.0      skip = 10
+    27       463        183.0      0.4      0.1      for index, image in enumerate(images):
+    28       462        148.0      0.3      0.1          if index % skip == 0:
+    29        47        305.0      6.5      0.1              _, fileName = os.path.split(image)
+    30        47     275605.0   5863.9     98.5              shutil.copy(image, os.path.join(outFolder, fileName))
+
+Total time: 0.238619 s
+File: converter.py
+Function: filter at line 32
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    32                                           @profile
+    33                                           def filter(inFolder, outFolder, inType, outType, width=None, height=None):
+    34         1       1059.0   1059.0      0.4      images = glob.glob(f"{inFolder}/*.{inType}")
+    35         1          2.0      2.0      0.0      images.sort()
+    36         1          1.0      1.0      0.0      if not images:
+    37                                                   raise RuntimeError(f"{inType} files required!")
+    38         1       9723.0   9723.0      4.1      first_image = Image.open(images[0])
+    39         1          1.0      1.0      0.0      w, h = first_image.size
+    40         1          0.0      0.0      0.0      if width and height:
+    41                                                   max_size = (width, height)
+    42         1          0.0      0.0      0.0      elif width:
+    43         1          1.0      1.0      0.0          max_size = (width, h)
+    44                                               elif height:
+    45                                                   max_size = (w, height)
+    46                                               else:
+    47                                                   raise RuntimeError('Width or height required!')
+    48        48         34.0      0.7      0.0      for count, image in enumerate(images):
+    49        47      30599.0    651.0     12.8          img = Image.open(image)
+    50        47     117540.0   2500.9     49.3          img.resize(max_size, Image.ANTIALIAS)
+    51        47        406.0      8.6      0.2          outImagePath = os.path.join(outFolder, f"frame{count:04d}_resized.{outType}")
+    52        47      78849.0   1677.6     33.0          img.save(outImagePath)
+    53        47        404.0      8.6      0.2          img.close()
+
+Total time: 0.243018 s
+File: converter.py
+Function: output at line 55
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    55                                           @profile
+    56                                           def output(inFolder, outputPath, inType, outType):
+    57         1       1386.0   1386.0      0.6      images = glob.glob(f"{inFolder}/*{inType}")
+    58         1          1.0      1.0      0.0      images.sort()
+    59         1          1.0      1.0      0.0      if not images:
+    60                                                   raise RuntimeError(f"{inType} files required!")
+    61         1      29449.0  29449.0     12.1      frames = [Image.open(image) for image in images]
+    62         1          1.0      1.0      0.0      frame_one = frames[0]
+    63         1     212180.0 212180.0     87.3      frame_one.save(outputPath, format=outType, append_images=frames, save_all=True, duration=50, loop=0)
+
+Total time: 2.18564 s
+File: converter.py
+Function: main at line 65
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    65                                           @profile
+    66                                           def main():
+    67         1          1.0      1.0      0.0      resourceFolder = "resource"
+    68         1          1.0      1.0      0.0      resourceName = "demo"
+    69         1          1.0      1.0      0.0      resourceType = "mp4"
+    70         1          9.0      9.0      0.0      resourcePath = os.path.join(resourceFolder, f"{resourceName}.{resourceType}")
+    71                                           
+    72         1          0.0      0.0      0.0      mem1 = "mem1"
+    73         1          0.0      0.0      0.0      mem2 = "mem2"
+    74         1          0.0      0.0      0.0      mem3 = "mem3"
+    75                                           
+    76         1          1.0      1.0      0.0      outputFolder = "output"
+    77         1          1.0      1.0      0.0      outputName = resourceName
+    78         1          1.0      1.0      0.0      outputType = "gif"
+    79         1          5.0      5.0      0.0      outputPath = os.path.join(outputFolder, f"{outputName}.{outputType}")
+    80                                           
+    81         5          4.0      0.8      0.0      for outDir in [mem1, mem2, mem3, outputFolder]:
+    82         4       1363.0    340.8      0.1          if os.path.exists(outDir):
+    83         4     238399.0  59599.8     10.9              shutil.rmtree(outDir)
+    84         4          3.0      0.8      0.0          try:
+    85         4       1727.0    431.8      0.1              os.mkdir(outDir)
+    86                                                   except IOError:
+    87                                                       print("Error occurred creating output folder")
+    88                                                       return
+    89                                           
+    90         1    1182093.0 1182093.0     54.1      decode(resourcePath, mem1)
+    91         1     279978.0 279978.0     12.8      select(mem1, mem2, "jpg")
+    92         1     239022.0 239022.0     10.9      filter(mem2, mem3, "jpg", "jpg", 800)
+    93         1     243033.0 243033.0     11.1      output(mem3, outputPath, "jpg", "GIF")
+

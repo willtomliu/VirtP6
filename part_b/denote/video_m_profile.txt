@@ -1,0 +1,112 @@
+Filename: converter.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+     8   95.137 MiB   95.137 MiB           1   @profile
+     9                                         def decode(resourcePath, outFolder):
+    10  104.082 MiB    8.945 MiB           1       video_capture = cv2.VideoCapture(resourcePath)
+    11  107.816 MiB    3.734 MiB           1       still_reading, image = video_capture.read()
+    12  107.816 MiB    0.000 MiB           1       frame_count = 0
+    13                                         
+    14  111.848 MiB    0.000 MiB         463       while still_reading:
+    15  111.848 MiB    1.449 MiB         462           cv2.imwrite(f"{outFolder}/frame_{frame_count:04d}.jpg", image)
+    16                                                 # read next image
+    17  111.848 MiB    2.582 MiB         462           still_reading, image = video_capture.read()
+    18  111.848 MiB    0.000 MiB         462           frame_count += 1
+
+
+Filename: converter.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+    20  113.363 MiB  113.363 MiB           1   @profile
+    21                                         def select(inFolder, outFolder, inType, outType=None):
+    22  113.363 MiB    0.000 MiB           1       images = glob.glob(f"{inFolder}/*.{inType}")
+    23  113.363 MiB    0.000 MiB           1       images.sort()
+    24  113.363 MiB    0.000 MiB           1       if not images:
+    25                                                 raise RuntimeError("jpg files required!")
+    26  113.363 MiB    0.000 MiB           1       skip = 10
+    27  113.363 MiB    0.000 MiB         463       for index, image in enumerate(images):
+    28  113.363 MiB    0.000 MiB         462           if index % skip == 0:
+    29  113.363 MiB    0.000 MiB          47               _, fileName = os.path.split(image)
+    30  113.363 MiB    0.000 MiB          47               shutil.copy(image, os.path.join(outFolder, fileName))
+
+
+Filename: converter.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+    32  113.363 MiB  113.363 MiB           1   @profile
+    33                                         def filter(inFolder, outFolder, inType, outType, width=None, height=None):
+    34  113.363 MiB    0.000 MiB           1       images = glob.glob(f"{inFolder}/*.{inType}")
+    35  113.363 MiB    0.000 MiB           1       images.sort()
+    36  113.363 MiB    0.000 MiB           1       if not images:
+    37                                                 raise RuntimeError(f"{inType} files required!")
+    38  113.668 MiB    0.305 MiB           1       first_image = Image.open(images[0])
+    39  113.668 MiB    0.000 MiB           1       w, h = first_image.size
+    40  113.668 MiB    0.000 MiB           1       if width and height:
+    41                                                 max_size = (width, height)
+    42  113.668 MiB    0.000 MiB           1       elif width:
+    43  113.668 MiB    0.000 MiB           1           max_size = (width, h)
+    44                                             elif height:
+    45                                                 max_size = (w, height)
+    46                                             else:
+    47                                                 raise RuntimeError('Width or height required!')
+    48  114.902 MiB    0.000 MiB          48       for count, image in enumerate(images):
+    49  114.902 MiB    0.000 MiB          47           img = Image.open(image)
+    50  114.902 MiB    1.234 MiB          47           img.resize(max_size, Image.ANTIALIAS)
+    51  114.902 MiB    0.000 MiB          47           outImagePath = os.path.join(outFolder, f"frame{count:04d}_resized.{outType}")
+    52  114.902 MiB    0.000 MiB          47           img.save(outImagePath)
+    53  114.902 MiB    0.000 MiB          47           img.close()
+
+
+Filename: converter.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+    55  114.902 MiB  114.902 MiB           1   @profile
+    56                                         def output(inFolder, outputPath, inType, outType):
+    57  114.902 MiB    0.000 MiB           1       images = glob.glob(f"{inFolder}/*{inType}")
+    58  114.902 MiB    0.000 MiB           1       images.sort()
+    59  114.902 MiB    0.000 MiB           1       if not images:
+    60                                                 raise RuntimeError(f"{inType} files required!")
+    61  115.156 MiB    0.254 MiB          50       frames = [Image.open(image) for image in images]
+    62  115.156 MiB    0.000 MiB           1       frame_one = frames[0]
+    63  130.160 MiB   15.004 MiB           1       frame_one.save(outputPath, format=outType, append_images=frames, save_all=True, duration=50, loop=0)
+
+
+Filename: converter.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+    65   95.137 MiB   95.137 MiB           1   @profile
+    66                                         def main():
+    67   95.137 MiB    0.000 MiB           1       resourceFolder = "resource"
+    68   95.137 MiB    0.000 MiB           1       resourceName = "demo"
+    69   95.137 MiB    0.000 MiB           1       resourceType = "mp4"
+    70   95.137 MiB    0.000 MiB           1       resourcePath = os.path.join(resourceFolder, f"{resourceName}.{resourceType}")
+    71                                         
+    72   95.137 MiB    0.000 MiB           1       mem1 = "mem1"
+    73   95.137 MiB    0.000 MiB           1       mem2 = "mem2"
+    74   95.137 MiB    0.000 MiB           1       mem3 = "mem3"
+    75                                         
+    76   95.137 MiB    0.000 MiB           1       outputFolder = "output"
+    77   95.137 MiB    0.000 MiB           1       outputName = resourceName
+    78   95.137 MiB    0.000 MiB           1       outputType = "gif"
+    79   95.137 MiB    0.000 MiB           1       outputPath = os.path.join(outputFolder, f"{outputName}.{outputType}")
+    80                                         
+    81   95.137 MiB    0.000 MiB           5       for outDir in [mem1, mem2, mem3, outputFolder]:
+    82   95.137 MiB    0.000 MiB           4           if os.path.exists(outDir):
+    83                                                     shutil.rmtree(outDir)
+    84   95.137 MiB    0.000 MiB           4           try:
+    85   95.137 MiB    0.000 MiB           4               os.mkdir(outDir)
+    86                                                 except IOError:
+    87                                                     print("Error occurred creating output folder")
+    88                                                     return
+    89                                         
+    90  113.363 MiB  113.363 MiB           1       decode(resourcePath, mem1)
+    91  113.363 MiB  113.363 MiB           1       select(mem1, mem2, "jpg")
+    92  114.902 MiB  114.902 MiB           1       filter(mem2, mem3, "jpg", "jpg", 800)
+    93  130.160 MiB  130.160 MiB           1       output(mem3, outputPath, "jpg", "GIF")
+
+
