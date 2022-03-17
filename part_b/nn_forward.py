@@ -56,20 +56,16 @@ def main():
     # layer1
     weights_1 = np.load("w1.npy")
     x = test_images @ weights_1
-    del test_images
-    del weights_1
     x = (x >= 0) * x
 
     # layer2
     weights_2 = np.load("w2.npy")
     x = x @ weights_2
-    del weights_2
     x = (x >= 0) * x
 
     # layer3
     weights_3 = np.load("w3.npy")
     x = x @ weights_3
-    del weights_3
     x = np.argmax(x, axis=1)
 
     test_labels = load_label(test_sample)

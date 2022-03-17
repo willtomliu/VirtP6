@@ -7,12 +7,12 @@ from PIL import Image
 @profile
 def main():
     # Settings
-    resourceFolder = "../part a/converter_with_scad"
+    resourceFolder = "../part_a/converter_with_scad"
     resourceName = "demo"
     resourceType = "mp4"
     resourcePath = os.path.join(resourceFolder, f"{resourceName}.{resourceType}")
 
-    outputFolder = "output"
+    outputFolder = "."
     outputName = resourceName
     outputType = "gif"
     outputPath = os.path.join(outputFolder, f"{outputName}.{outputType}")

@@ -7,27 +7,24 @@ from PIL import Image
 @profile
 def main():
     # Settings
-    resourceFolder = "../part a/converter_with_scad"
+    resourceFolder = "../part_a/converter_with_scad"
     resourceName = "demo"
     resourceType = "mp4"
     resourcePath = os.path.join(resourceFolder, f"{resourceName}.{resourceType}")
 
-    outputFolder = "output"
+    outputFolder = "."
     outputName = resourceName
     outputType = "gif"
     outputPath = os.path.join(outputFolder, f"{outputName}.{outputType}")
 
-    # Decode
     video_capture = cv2.VideoCapture(resourcePath)
     still_reading = True
     all_images = []
 
     while still_reading:
-        # read next image
         still_reading, image = video_capture.read()
         all_images.append(image)
 
-    # Select
     selected_images = []
 
     skip = 10
@@ -35,7 +32,6 @@ def main():
         if index % skip == 0:
             selected_images.append(image.copy())
 
-    # Filter
     filtered_images = []
     width, height = 200, 100
     first_image = selected_images[0]
@@ -52,7 +48,6 @@ def main():
     for count, image in enumerate(selected_images):
         filtered_images.append(cv2.resize(image, max_size))
 
-    # Output
     frames = [Image.fromarray(image) for image in filtered_images]
     frame_one = frames[0]
     frame_one.save(outputPath, format="GIF", append_images=frames, save_all=True, duration=50, loop=0)

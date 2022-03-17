@@ -1,0 +1,32 @@
+Timer unit: 1e-06 s
+
+Total time: 0.061105 s
+File: nn_forward.py
+Function: main at line 51
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    51                                           @profile
+    52                                           def main():
+    53         1          4.0      4.0      0.0      test_sample = 100
+    54         1      37556.0  37556.0     61.5      test_images = load_data(test_sample)
+    55                                           
+    56                                               # layer1
+    57         1      19356.0  19356.0     31.7      weights_1 = np.load("w1.npy")
+    58         1        775.0    775.0      1.3      x = test_images @ weights_1
+    59         1        323.0    323.0      0.5      x = (x >= 0) * x
+    60                                           
+    61                                               # layer2
+    62         1       1510.0   1510.0      2.5      weights_2 = np.load("w2.npy")
+    63         1        382.0    382.0      0.6      x = x @ weights_2
+    64         1        146.0    146.0      0.2      x = (x >= 0) * x
+    65                                           
+    66                                               # layer3
+    67         1        654.0    654.0      1.1      weights_3 = np.load("w3.npy")
+    68         1         39.0     39.0      0.1      x = x @ weights_3
+    69         1         27.0     27.0      0.0      x = np.argmax(x, axis=1)
+    70                                           
+    71         1        250.0    250.0      0.4      test_labels = load_label(test_sample)
+    72         1         42.0     42.0      0.1      accuracy = np.sum(x == np.argmax(test_labels, axis=1))
+    73         1         41.0     41.0      0.1      print(accuracy / test_sample)
+

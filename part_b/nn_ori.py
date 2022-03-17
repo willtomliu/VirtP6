@@ -43,8 +43,8 @@ def main():
     rng = np.random.default_rng(seed)
 
     learning_rate = 0.005
-    epochs = 20
-    hidden_size = 5000
+    epochs = 5
+    hidden_size = 500
     pixels_per_image = 784
     num_labels = 10
 

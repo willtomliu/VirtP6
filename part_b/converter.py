@@ -1,42 +1,40 @@
-import cv2
-import glob
-import os
-import shutil
+import gc
 
+import cv2
+import os
 from PIL import Image
 
-# @profile
-def decode(resourcePath, outFolder):
+
+@profile
+def decode(resourcePath):
     video_capture = cv2.VideoCapture(resourcePath)
-    still_reading, image = video_capture.read()
-    frame_count = 0
+    still_reading = True
+    all_images = []
 
     while still_reading:
-        cv2.imwrite(f"{outFolder}/frame_{frame_count:04d}.jpg", image)
-        # read next image
         still_reading, image = video_capture.read()
-        frame_count += 1
+        all_images.append(image)
+    gc.collect()
+    return all_images
 
-# @profile
-def select(inFolder, outFolder, inType, outType=None):
-    images = glob.glob(f"{inFolder}/*.{inType}")
-    images.sort()
-    if not images:
-        raise RuntimeError("jpg files required!")
+
+@profile
+def select(all_images):
+    selected_images = []
     skip = 10
-    for index, image in enumerate(images):
+    for index, image in enumerate(all_images):
         if index % skip == 0:
-            _, fileName = os.path.split(image)
-            shutil.copy(image, os.path.join(outFolder, fileName))
+            selected_images.append(image.copy())
+    gc.collect()
+    return selected_images
 
-# @profile
-def filter(inFolder, outFolder, inType, outType, width=None, height=None):
-    images = glob.glob(f"{inFolder}/*.{inType}")
-    images.sort()
-    if not images:
-        raise RuntimeError(f"{inType} files required!")
-    first_image = Image.open(images[0])
-    w, h = first_image.size
+
+@profile
+def filter(selected_images):
+    filtered_images = []
+    width, height = 200, 100
+    first_image = selected_images[0]
+    w, h, _ = first_image.shape
     if width and height:
         max_size = (width, height)
     elif width:
@@ -45,52 +43,40 @@ def filter(inFolder, outFolder, inType, outType, width=None, height=None):
         max_size = (w, height)
     else:
         raise RuntimeError('Width or height required!')
-    for count, image in enumerate(images):
-        img = Image.open(image)
-        img.resize(max_size, Image.ANTIALIAS)
-        outImagePath = os.path.join(outFolder, f"frame{count:04d}_resized.{outType}")
-        img.save(outImagePath)
-        img.close()
 
-# @profile
-def output(inFolder, outputPath, inType, outType):
-    images = glob.glob(f"{inFolder}/*{inType}")
-    images.sort()
-    if not images:
-        raise RuntimeError(f"{inType} files required!")
-    frames = [Image.open(image) for image in images]
+    for count, image in enumerate(selected_images):
+        filtered_images.append(cv2.resize(image, max_size))
+    gc.collect()
+    return filtered_images
+
+
+@profile
+def output(outputPath, filtered_images):
+    frames = [Image.fromarray(image) for image in filtered_images]
     frame_one = frames[0]
-    frame_one.save(outputPath, format=outType, append_images=frames, save_all=True, duration=50, loop=0)
+    frame_one.save(outputPath, format="GIF", append_images=frames, save_all=True, duration=50, loop=0)
+    gc.collect()
+
+
 
 # @profile
 def main():
-    resourceFolder = "../part a/converter_with_scad"
-    resourceName = "demo"
+    # Settings
+    resourceFolder = "../part_a/converter_with_scad"
+    resourceName = "bigger"
     resourceType = "mp4"
-    resourcePath = os.path.join(resourceFolder, f"{resourceName}.{resourceType}")
+    resourcePath = os.path.join(resourceFolder,
+                                f"{resourceName}.{resourceType}")
 
-    mem1 = "mem1"
-    mem2 = "mem2"
-    mem3 = "mem3"
-
-    outputFolder = "output"
+    outputFolder = "."
     outputName = resourceName
     outputType = "gif"
     outputPath = os.path.join(outputFolder, f"{outputName}.{outputType}")
 
-    for outDir in [mem1, mem2, mem3, outputFolder]:
-        if os.path.exists(outDir):
-            shutil.rmtree(outDir)
-        try:
-            os.mkdir(outDir)
-        except IOError:
-            print("Error occurred creating output folder")
-            return
-
-    decode(resourcePath, mem1)
-    select(mem1, mem2, "jpg")
-    filter(mem2, mem3, "jpg", "jpg", 800)
-    output(mem3, outputPath, "jpg", "GIF")
+    x = decode(resourcePath)
+    x = select(x)
+    x = filter(x)
+    output(outputPath, x)
 
 
 if __name__ == '__main__':

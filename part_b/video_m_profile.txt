@@ -1,0 +1,53 @@
+Filename: converter_ori.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+     7   59.762 MiB   59.762 MiB           1   @profile
+     8                                         def main():
+     9                                             # Settings
+    10   59.762 MiB    0.000 MiB           1       resourceFolder = "../part_a/converter_with_scad"
+    11   59.762 MiB    0.000 MiB           1       resourceName = "demo"
+    12   59.762 MiB    0.000 MiB           1       resourceType = "mp4"
+    13   59.762 MiB    0.000 MiB           1       resourcePath = os.path.join(resourceFolder, f"{resourceName}.{resourceType}")
+    14                                         
+    15   59.762 MiB    0.000 MiB           1       outputFolder = "."
+    16   59.762 MiB    0.000 MiB           1       outputName = resourceName
+    17   59.762 MiB    0.000 MiB           1       outputType = "gif"
+    18   59.762 MiB    0.000 MiB           1       outputPath = os.path.join(outputFolder, f"{outputName}.{outputType}")
+    19                                         
+    20   66.086 MiB    6.324 MiB           1       video_capture = cv2.VideoCapture(resourcePath)
+    21   66.086 MiB    0.000 MiB           1       still_reading = True
+    22   66.086 MiB    0.000 MiB           1       all_images = []
+    23                                         
+    24  178.133 MiB    0.000 MiB         464       while still_reading:
+    25  178.133 MiB  112.000 MiB         463           still_reading, image = video_capture.read()
+    26  178.133 MiB    0.047 MiB         463           all_images.append(image)
+    27                                         
+    28  178.133 MiB    0.000 MiB           1       selected_images = []
+    29                                         
+    30  178.133 MiB    0.000 MiB           1       skip = 10
+    31  188.602 MiB    0.000 MiB         464       for index, image in enumerate(all_images):
+    32  188.602 MiB    0.000 MiB         463           if index % skip == 0:
+    33  188.602 MiB   10.469 MiB          47               selected_images.append(image.copy())
+    34                                         
+    35  188.602 MiB    0.000 MiB           1       filtered_images = []
+    36  188.602 MiB    0.000 MiB           1       width, height = 200, 100
+    37  188.602 MiB    0.000 MiB           1       first_image = selected_images[0]
+    38  188.602 MiB    0.000 MiB           1       w, h, _ = first_image.shape
+    39  188.602 MiB    0.000 MiB           1       if width and height:
+    40  188.602 MiB    0.000 MiB           1           max_size = (width, height)
+    41                                             elif width:
+    42                                                 max_size = (width, h)
+    43                                             elif height:
+    44                                                 max_size = (w, height)
+    45                                             else:
+    46                                                 raise RuntimeError('Width or height required!')
+    47                                         
+    48  191.457 MiB    0.000 MiB          48       for count, image in enumerate(selected_images):
+    49  191.457 MiB    2.855 MiB          47           filtered_images.append(cv2.resize(image, max_size))
+    50                                         
+    51  195.285 MiB    3.828 MiB          50       frames = [Image.fromarray(image) for image in filtered_images]
+    52  195.285 MiB    0.000 MiB           1       frame_one = frames[0]
+    53  198.059 MiB    2.773 MiB           1       frame_one.save(outputPath, format="GIF", append_images=frames, save_all=True, duration=50, loop=0)
+
+

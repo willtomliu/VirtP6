@@ -1,0 +1,30 @@
+0.77
+Filename: nn_forward.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+    51   49.586 MiB   49.586 MiB           1   @profile
+    52                                         def main():
+    53   49.586 MiB    0.000 MiB           1       test_sample = 100
+    54   65.711 MiB   16.125 MiB           1       test_images = load_data(test_sample)
+    55                                         
+    56                                             # layer1
+    57   68.730 MiB    3.020 MiB           1       weights_1 = np.load("w1.npy")
+    58   69.969 MiB    1.238 MiB           1       x = test_images @ weights_1
+    59   70.328 MiB    0.359 MiB           1       x = (x >= 0) * x
+    60                                         
+    61                                             # layer2
+    62   72.238 MiB    1.910 MiB           1       weights_2 = np.load("w2.npy")
+    63   72.270 MiB    0.031 MiB           1       x = x @ weights_2
+    64   72.270 MiB    0.000 MiB           1       x = (x >= 0) * x
+    65                                         
+    66                                             # layer3
+    67   72.270 MiB    0.000 MiB           1       weights_3 = np.load("w3.npy")
+    68   72.270 MiB    0.000 MiB           1       x = x @ weights_3
+    69   72.277 MiB    0.008 MiB           1       x = np.argmax(x, axis=1)
+    70                                         
+    71   72.289 MiB    0.012 MiB           1       test_labels = load_label(test_sample)
+    72   72.305 MiB    0.016 MiB           1       accuracy = np.sum(x == np.argmax(test_labels, axis=1))
+    73   72.312 MiB    0.008 MiB           1       print(accuracy / test_sample)
+
+
